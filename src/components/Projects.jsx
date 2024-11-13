@@ -1,100 +1,108 @@
-import React, { useEffect } from "react";
-import gsap from "gsap";
+import React, { useState, useEffect } from "react";
+import { Cursor } from "./Cursor";
+import { ProjectsView } from "./ProjectsView";
+import securecampus from '../assets/securecampus.jpg';
+
+const ProjectCard = ({ image, title, onMouseEnter, onMouseLeave, onClick }) => {
+  return (
+    <div
+      className="w-full h-full flex flex-col gap-5 cursor-pointer"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onClick={onClick}
+    >
+      <div className="w-full h-[700px] relative overflow-hidden rounded-md">
+        <img
+          className="w-full h-full object-cover object-top rounded-md"
+          src={image}
+          alt={title}
+        />
+      </div>
+      <div>
+        {/* <h3 className="text-center text-white">{title}</h3> */}
+      </div>
+    </div>
+  );
+};
 
 export const Projects = () => {
+  const [isActive, setIsActive] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+
+  const projects = [
+    {
+      id: 1,
+      image: securecampus,
+      image1: "https://kevinhilgendorf.com/images/thumb2_1.avif",
+      title: "Secure Campus",
+      text: 'lorem',
+    },
+    {
+      id: 2,
+      image: "https://kevinhilgendorf.com/images/thumb_1.avif",
+      title: "Arena",
+      text: 'hell2',
+    }
+  ];
+
+
+  const toggleSidebar = (project) => {
+    setSelectedProject(project);
+    setIsSidebarOpen(prevState => !prevState);
+  };
+
   useEffect(() => {
-    const cursor = document.getElementById("cursor");
-    const images = document.querySelectorAll("img");
-    const cursortext = document.querySelector(".cursor-text");
-
-    const onMouseMove = (event) => {
-      const { clientX, clientY } = event;
-  
-      gsap.set(cursor, { x: clientX , y: clientY , duration: 0.1 });
-      
-    };
-
-    const onMouseEnterImg = () => {
-      gsap.to(cursor, { scale: 5, backgroundColor: "white", ease: "power2.out"  });
-      cursor.style.cursor = "pointer";
-      cursortext.style.display = "block";
-    };
-
-    const onMouseLeaveImg = () => {
-      gsap.to(cursor, { scale: 1, backgroundColor: "transparent" });
-    
-      cursortext.style.display = "none";
-    };
-
-    window.addEventListener("mousemove", onMouseMove);
-
-    images.forEach((img) => {
-      img.addEventListener("mouseenter", onMouseEnterImg);
-      img.addEventListener("mouseleave", onMouseLeaveImg);
-    });
-
-    
+    if (isSidebarOpen) {
+      document.body.style.overflowY = "hidden"; 
+      document.body.style.overflowX = "hidden"; 
+    } else {
+      document.body.style.overflowY = "auto"; 
+      document.body.style.overflowX = "hidden";
+    }
     return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      images.forEach((img) => {
-        img.removeEventListener("mouseenter", onMouseEnterImg);
-        img.removeEventListener("mouseleave", onMouseLeaveImg);
-      });
+      document.body.style.overflowY = "auto";
+      document.body.style.overflowX = "hidden";
     };
-  }, []);
+  }, [isSidebarOpen]);
+  
+  
+  
 
   return (
-    <section className="projects_wrapper w-full h-auto" id="projects">
-      <div id="cursor" className="cursor">
-        <span className="cursor-text font-bold font-inter-tight font-normal  text-black">View</span>
-      </div>
+    <section className="w-full h-auto" id="projects">
+      {isSidebarOpen && (
+        <div
+          className="fixed w-full h-full inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
       <div className="w-full h-[10vh] mb-10 flex justify-center items-center pt-5">
         <h2 className="font-inter-tight font-normal text-white text-[62px] leading-10">
           Projects
         </h2>
       </div>
+
+      <Cursor isActive={isActive} />
+      <ProjectsView
+        isSidebarOpen={isSidebarOpen}
+        selectedProject={selectedProject}
+        setIsSidebarOpen={setIsSidebarOpen} 
+      />
+
       <div className="w-full h-full flex flex-col relative">
         <div className="w-full h-full flex justify-center">
-          <div className="wrapper w-[1200px] h-full relative flex gap-10">
-            <div className="portfolio-item w-full h-full flex flex-col gap-5">
-              <div className="portfolio-thumb w-full h-[700px] relative">
-                <img
-                  className="w-full h-full object-cover object-top rounded-md"
-                  src="https://kevinhilgendorf.com/images/thumb2_1.avif"
-                  alt="Project Thumbnail"
-                />
-              </div>
-              <div className="text">
-                <p className="font-inter-tight text-[38px] font-medium text-white">
-                  Arena
-                </p>
-              </div>
-            </div>
-
-            <div className="w-full h-full flex flex-col gap-5">
-              <div className="w-full h-[700px]">
-                <img
-                  className="w-full h-full object-cover object-top rounded-md"
-                  src="https://kevinhilgendorf.com/images/thumb_1.avif"
-                  alt="Project Thumbnail"
-                />
-              </div>
-              <div className="text">
-                <p className="font-inter-tight text-[38px] font-medium text-white">
-                  Arena
-                </p>
-              </div>
-            </div>
-          </div>
-          
-        </div>
-      
-        
-        <div className="gradient-black mt-5 w-screen h-[500px] z-10 absolute bottom-0 left-0 flex justify-center items-end">
-          <div className="text">
-            <button className="rounded-full bg-[#141414] border border-[#2e2e2e] p-4 w-[200px] font-inter-tight text-[16px] font-medium text-white">
-              View More
-            </button>
+          <div className="w-[1200px] h-full relative flex gap-10">
+            {projects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                image={project.image}
+                title={project.title}
+                onMouseEnter={() => setIsActive(true)}
+                onMouseLeave={() => setIsActive(false)}
+                onClick={() => toggleSidebar(project)} 
+              />
+            ))}
           </div>
         </div>
       </div>
